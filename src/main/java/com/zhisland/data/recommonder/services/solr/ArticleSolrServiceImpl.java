@@ -4,8 +4,8 @@
 package com.zhisland.data.recommonder.services.solr;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -73,17 +73,25 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
 
         SolrInputDocument doc = new SolrInputDocument();
         doc.setField(field_id, article.getId());
-        doc.setField(field_title, article.getTitle(), field_boost_title);
-        doc.setField(field_summary, article.getSummary(), field_boost_summary);
-        doc.setField(field_body, article.getBody(), field_boost_body);
         doc.setField(field_public_date, article.getPublicDate());
+        
+//        doc.setField(field_title, article.getTitle(), field_boost_title);
+//        doc.setField(field_summary, article.getSummary(), field_boost_summary);
+//        doc.setField(field_body, article.getBody(), field_boost_body);
+        
+        doc.setField(field_title, article.getTitle());
+        doc.setField(field_summary, article.getSummary());
+        doc.setField(field_body, article.getBody());
+        
 
         for (String tag : article.getTags()) {
-            doc.addField(field_tag, tag, field_boost_tag);
+//            doc.addField(field_tag, tag, field_boost_tag);
+            doc.addField(field_tag, tag);
         }
 
         for (String author : article.getAuthors()) {
-            doc.addField(field_author, author, field_boost_author);
+//            doc.addField(field_author, author, field_boost_author);
+            doc.addField(field_author, author);
         }
 
         solrServer.add(doc);
@@ -108,18 +116,31 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
         // 匹配文档不包括源文档
         solrQuery.set(MoreLikeThisParams.MATCH_INCLUDE, false);
 
+        solrQuery.set(MoreLikeThisParams.MIN_DOC_FREQ, 1);
+
+        solrQuery.set(MoreLikeThisParams.MIN_TERM_FREQ, 1);
+
+        solrQuery.set(MoreLikeThisParams.MIN_WORD_LEN, 2);
+
+        solrQuery.set(MoreLikeThisParams.MAX_QUERY_TERMS, 100);
+
         // request interesting terms to be booted with their tf-idf score
         solrQuery.set(MoreLikeThisParams.BOOST, true);
 
         // request interesting terms to be returned along with documents
-        solrQuery.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
+         solrQuery.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
 
         // the fields in which to look for interesting terms
-        solrQuery.set(MoreLikeThisParams.SIMILARITY_FIELDS, field_author + Constants.COMMA + field_body
-                + Constants.COMMA + field_summary + Constants.COMMA + field_tag + Constants.COMMA + field_title);
+        solrQuery.set(MoreLikeThisParams.SIMILARITY_FIELDS, field_tag + Constants.COMMA + field_summary
+                + Constants.COMMA + field_author + Constants.COMMA + field_title + Constants.COMMA + field_body);
+
+        // boosting applied to mlt fields
+        solrQuery.set(MoreLikeThisParams.QF, field_author + "^" + field_boost_author + " " + field_body + "^"
+                + field_boost_body + " " + field_summary + "^" + field_boost_summary + " " + field_tag + "^"
+                + field_boost_tag + " " + field_title + "^" + field_boost_title);
 
         // return list of fields
-        solrQuery.set("fl", "id");
+        solrQuery.set("fl", "id, score");
 
         // default search field
         solrQuery.set("df", "text");
@@ -135,9 +156,9 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
         QueryResponse resp = solrServer.query(solrQuery);
         SolrDocumentList hits = resp.getResults();
 
-        Set<Integer> rmds = new TreeSet<Integer>();
+        Set<Integer> rmds = new LinkedHashSet<Integer>();
         for (SolrDocument doc : hits) {
-            rmds.add((int) doc.getFieldValue(field_id));
+            rmds.add(Integer.parseInt(doc.getFieldValue(field_id).toString()));
         }
 
         return rmds;

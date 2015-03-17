@@ -5,6 +5,7 @@ package com.zhisland.data.recommonder.controllers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Set;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -40,8 +41,8 @@ public class ArticleRecommendController {
         JsonData data = new JsonData();
 
         try {
-            articleRecommendService.recommend(id, start, rows);
-            data.put("result", "ok");
+            Set<Integer> rmdIds = articleRecommendService.recommend(id, start, rows);
+            data.put("result", rmdIds);
             struct.setData(data);
             struct.setStatusToSuccess();
         } catch (Exception e) {
