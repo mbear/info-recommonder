@@ -74,23 +74,22 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
         SolrInputDocument doc = new SolrInputDocument();
         doc.setField(field_id, article.getId());
         doc.setField(field_public_date, article.getPublicDate());
-        
-//        doc.setField(field_title, article.getTitle(), field_boost_title);
-//        doc.setField(field_summary, article.getSummary(), field_boost_summary);
-//        doc.setField(field_body, article.getBody(), field_boost_body);
-        
+
+        // doc.setField(field_title, article.getTitle(), field_boost_title);
+        // doc.setField(field_summary, article.getSummary(), field_boost_summary);
+        // doc.setField(field_body, article.getBody(), field_boost_body);
+
         doc.setField(field_title, article.getTitle());
         doc.setField(field_summary, article.getSummary());
         doc.setField(field_body, article.getBody());
-        
 
         for (String tag : article.getTags()) {
-//            doc.addField(field_tag, tag, field_boost_tag);
+            // doc.addField(field_tag, tag, field_boost_tag);
             doc.addField(field_tag, tag);
         }
 
         for (String author : article.getAuthors()) {
-//            doc.addField(field_author, author, field_boost_author);
+            // doc.addField(field_author, author, field_boost_author);
             doc.addField(field_author, author);
         }
 
@@ -128,7 +127,7 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
         solrQuery.set(MoreLikeThisParams.BOOST, true);
 
         // request interesting terms to be returned along with documents
-//         solrQuery.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
+        // solrQuery.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
 
         // the fields in which to look for interesting terms
         solrQuery.set(MoreLikeThisParams.SIMILARITY_FIELDS, field_tag + Constants.COMMA + field_summary
@@ -157,8 +156,10 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
         SolrDocumentList hits = resp.getResults();
 
         Set<Integer> rmds = new LinkedHashSet<Integer>();
-        for (SolrDocument doc : hits) {
-            rmds.add(Integer.parseInt(doc.getFieldValue(field_id).toString()));
+        if (hits != null) {
+            for (SolrDocument doc : hits) {
+                rmds.add(Integer.parseInt(doc.getFieldValue(field_id).toString()));
+            }
         }
 
         return rmds;
