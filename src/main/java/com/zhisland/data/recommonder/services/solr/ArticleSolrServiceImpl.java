@@ -121,7 +121,7 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
 
         solrQuery.set(MoreLikeThisParams.MIN_WORD_LEN, 2);
 
-        solrQuery.set(MoreLikeThisParams.MAX_QUERY_TERMS, 100);
+        solrQuery.set(MoreLikeThisParams.MAX_QUERY_TERMS, 1000);
 
         // request interesting terms to be booted with their tf-idf score
         solrQuery.set(MoreLikeThisParams.BOOST, true);
