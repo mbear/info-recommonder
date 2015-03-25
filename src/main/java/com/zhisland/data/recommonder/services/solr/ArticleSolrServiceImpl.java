@@ -127,7 +127,7 @@ public class ArticleSolrServiceImpl implements ArticleSolrService {
         solrQuery.set(MoreLikeThisParams.BOOST, true);
 
         // request interesting terms to be returned along with documents
-        // solrQuery.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
+//         solrQuery.set(MoreLikeThisParams.INTERESTING_TERMS, "details");
 
         // the fields in which to look for interesting terms
         solrQuery.set(MoreLikeThisParams.SIMILARITY_FIELDS, field_tag + Constants.COMMA + field_summary
